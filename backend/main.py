@@ -34,7 +34,11 @@ app.add_middleware(
 
 app.include_router(job_router)
 app.include_router(stream_router)
+# Vercel routes requests through /api while local development can use the
+# short routes above. Keeping both makes the frontend deploy without changes.
+app.include_router(job_router, prefix="/api")
+app.include_router(stream_router, prefix="/api")
 
 @app.get("/")
 def home():
-    return {"message": "AI Job Agent Running 🚀"}
+    return {"message": "AI Job Agent Running 🚀"}

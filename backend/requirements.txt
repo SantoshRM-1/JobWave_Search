@@ -3,12 +3,7 @@ uvicorn[standard]
 pydantic
 pydantic-settings
 sqlalchemy
-sentence-transformers
 pymupdf
-langchain
-langchain-groq
-langchain-community
 python-dotenv
 requests
 python-multipart
-numpy

@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Form, UploadFile, File, BackgroundTasks, Depends
+from fastapi import APIRouter, Form, UploadFile, File, BackgroundTasks, Depends, HTTPException
 from typing import Optional, Dict
 from backend.agents.orchestrator import orchestrate_flow
 from sqlalchemy.orm import Session
@@ -12,7 +12,20 @@ router = APIRouter()
 
 # Temporary in-memory cache for results before persisting finalized jobs (since our orchestrator returns full job dicts)
 # In production, the orchestrator should directly write finished jobs to the DB.
-job_results_cache: Dict[str, list] = {}
+job_results_cache: Dict[str, dict] = {}
+
+
+async def read_resume(resume: Optional[UploadFile]) -> Optional[bytes]:
+    if not resume or not resume.filename:
+        return None
+    if not resume.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Please upload a PDF resume.")
+    contents = await resume.read()
+    if not contents.startswith(b"%PDF"):
+        raise HTTPException(status_code=400, detail="That file is not a valid PDF.")
+    if len(contents) > 8 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Please upload a PDF smaller than 8 MB.")
+    return contents
 
 async def run_orchestrator_background(query: str, location: str, resume_bytes: Optional[bytes], session_id: str):
     """Executes the AI orchestrator in the background and stores the result."""
@@ -20,7 +33,7 @@ async def run_orchestrator_background(query: str, location: str, resume_bytes: O
         # Pass the session_id so all SSE events go to the correct client queue
         result = await orchestrate_flow(query, location, session_id, resume_bytes)
         # Store results temporarily
-        job_results_cache[session_id] = result.get("results", [])
+        job_results_cache[session_id] = {"jobs": result.get("results", []), "resume": result.get("resume")}
     except Exception as e:
         print(f"Background task failed: {e}")
         await stream_manager.emit(session_id, "ERROR", f"Agent execution failed: {str(e)}")
@@ -40,18 +53,29 @@ async def match_jobs(
     """
     session_id = str(uuid.uuid4())
     
-    resume_bytes = None
-    if resume and resume.filename:
-        resume_bytes = await resume.read()
+    resume_bytes = await read_resume(resume)
         
     background_tasks.add_task(run_orchestrator_background, query, location, resume_bytes, session_id)
     
     return {"session_id": session_id, "message": "Agent execution started."}
 
+
+@router.post("/search")
+async def search_now(
+    query: str = Form(default=""),
+    location: Optional[str] = Form(default=""),
+    resume: Optional[UploadFile] = File(None),
+):
+    """One reliable request for the web UI; ideal for serverless/Vercel hosting."""
+    resume_bytes = await read_resume(resume)
+    session_id = str(uuid.uuid4())
+    result = await orchestrate_flow(query, location or "", session_id, resume_bytes)
+    return {"jobs": result.get("results", []), "resume": result.get("resume")}
+
 @router.get("/jobs/results/{session_id}")
 async def get_match_results(session_id: str):
     """Polling endpoint or fetch once stream ends to get the compiled JSON results."""
-    return {"jobs": job_results_cache.get(session_id, [])}
+    return job_results_cache.get(session_id, {"jobs": [], "resume": None})
 
 @router.post("/jobs/interact")
 async def log_job_interaction(interaction: JobInteractionCreate, db: Session = Depends(get_db)):
