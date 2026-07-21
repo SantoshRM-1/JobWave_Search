@@ -86,7 +86,3 @@ npm run dev
 
 ---
 
-<div align="center">
-  <i>Built with ❤️ using Groq, React, and LangChain.</i>
-</div>
-
