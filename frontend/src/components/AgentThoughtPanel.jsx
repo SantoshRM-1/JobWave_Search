@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, LoaderCircle } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:8000' : '/api');
 
 export default function AgentThoughtPanel({ sessionId, onComplete }) {
   const [status, setStatus] = useState(''); const [done, setDone] = useState(false);
