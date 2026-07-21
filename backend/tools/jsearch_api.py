@@ -7,6 +7,40 @@ from typing import List, Dict, Any
 DEFAULT_PAGE_COUNT = 3
 MAX_RESULTS = 30
 
+
+def fetch_serpapi_jobs(query: str, location: str = "") -> List[Dict[str, Any]]:
+    """Use the project's existing SerpApi key when RapidAPI is not configured."""
+    api_key = os.getenv("SERP_API_KEY", "").strip()
+    if not api_key:
+        return []
+    actual_location = location.strip() if location else "Remote"
+    try:
+        response = requests.get(
+            "https://serpapi.com/search.json",
+            params={"engine": "google_jobs", "q": f"{query} {actual_location}", "api_key": api_key},
+            timeout=8,
+        )
+        response.raise_for_status()
+        results = response.json().get("jobs_results", [])[:MAX_RESULTS]
+        cleaned = []
+        for index, job in enumerate(results):
+            apply_options = job.get("apply_options") or []
+            apply_url = next((option.get("link") for option in apply_options if option.get("link")), None)
+            cleaned.append({
+                "id": f"serp_{job.get('job_id') or index}_{job.get('title', '')}",
+                "title": job.get("title", "Untitled role"),
+                "company": job.get("company_name", "Company not listed"),
+                "location": job.get("location", actual_location),
+                "description": job.get("description", "")[:3000],
+                "apply_url": apply_url or job.get("share_link"),
+                "posted_at": job.get("detected_extensions", {}).get("posted_at"),
+                "employment_type": job.get("detected_extensions", {}).get("schedule_type", "Full-time"),
+            })
+        return cleaned
+    except Exception as error:
+        print(f"SerpApi job search error: {error}")
+        return []
+
 def fetch_jobs(query: str, location: str = "") -> List[Dict[str, Any]]:
     """
     Fetches real job listings using the JSearch API (RapidAPI).
@@ -14,7 +48,10 @@ def fetch_jobs(query: str, location: str = "") -> List[Dict[str, Any]]:
     """
     api_key = os.getenv("RAPIDAPI_KEY")
     if not api_key or api_key == "your_rapidapi_key_here":
-        print("Warning: RAPIDAPI_KEY not configured. Returning mock data.")
+        serpapi_jobs = fetch_serpapi_jobs(query, location)
+        if serpapi_jobs:
+            return serpapi_jobs
+        print("Warning: no live job provider configured or available. Returning fallback data.")
         return get_mock_jobs(query, location)
 
     # Defaults handling
