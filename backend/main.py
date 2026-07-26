@@ -39,6 +39,7 @@ app.include_router(stream_router)
 app.include_router(job_router, prefix="/api")
 app.include_router(stream_router, prefix="/api")
 
-@app.get("/")
-def home():
+@app.get("/api/health")
+def health_check():
     return {"message": "AI Job Agent Running 🚀"}
+
