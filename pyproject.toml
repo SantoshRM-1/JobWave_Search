@@ -1,0 +1,7 @@
+[project]
+name = "jobwave-search"
+version = "0.1.0"
+description = "AI Job Search Agent"
+
+[tool.vercel]
+entrypoint = "api.backend:app"
