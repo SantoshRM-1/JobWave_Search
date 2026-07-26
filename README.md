@@ -1,88 +1,176 @@
 <div align="center">
-  <h1> FutureRole API: AI Job Search Platform</h1>
-  
-  <p>
-    <b>A next-generation, agentic AI recruitment tool that bridges the gap between candidates and their perfect roles.</b>
-  </p>
+
+  <h1>🌊 JobWave Search</h1>
+  <p><b>An Agentic AI-Powered Job Discovery & Match Ranking Engine</b></p>
 
   <p>
-    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
-    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
+    <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Groq_LLaMA_3.3_70B-F34B21?style=for-the-badge&logo=groq&logoColor=white" alt="Groq" />
+    <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
   </p>
+
 </div>
 
 ---
 
-##  Overview
+## 📌 Overview
 
-**FutureRole** goes beyond standard keyword-matching. By utilizing **Groq's hyper-fast LLaMA-3.3-70b**, **LangChain multi-agent workflows**, and **In-Memory Vector Search**, this platform analyzes a candidate's resume holistically to retrieve, rank, and explain job matches in real-time.
+**JobWave Search** (formerly *AI Job Agent*) is an intelligent, multi-agent recruitment platform designed to connect job seekers with tailored career opportunities. Unlike conventional search engines that rely purely on basic keyword matching, JobWave Search utilizes **Groq-powered LLaMA 3.3 (70B)**, a multi-agent orchestration pipeline, and automated PDF resume analysis to match, rank, and explain job fit in real time.
 
 ---
 
-## Core Features
+## ✨ Key Features
 
 | Feature | Description |
 | :--- | :--- |
-|  **Live Agent Reasoning** | Watch the AI "think" in real-time via Server-Sent Events (SSE). |
-|  **Hybrid Scoring Engine** | Combines Semantic Similarity (40%), LLM Heuristics (30%), Rule-based Logic (20%), and Recency (10%). |
-|  **Intelligent Resume Parsing** | Deep extraction of skills, experience level, and role alignment from PDFs. |
-|  **Explainable AI (XAI)** | Plain-English explanations of skill gaps and alignment for every job. |
-|  **Mock Interview Gen** | Automatically generates customized interview prep questions tailored perfectly to the match. |
+| 📄 **Smart PDF Resume Parsing** | Extracts skills, target roles, and experience levels directly from uploaded PDF resumes using PyMuPDF and LLaMA 3.3. |
+| 🤖 **Multi-Agent Orchestration** | Autonomous agent workflow featuring specialized Planner, Search, Resume, Matching, and Explanation agents. |
+| ⚡ **Live Real-Time SSE Streaming** | Streams agent reasoning steps and thinking status via Server-Sent Events (SSE) directly to the user interface. |
+| 🎯 **AI Fit Scoring & XAI** | Generates percentage match scores, plain-English explanations of fit, and skill gap analyses. |
+| 💡 **Tailored Interview Question Generator** | Automatically crafts custom interview prep questions tailored specifically to each candidate and role. |
+| 🔍 **Multi-Provider Job Aggregation** | Fetches live jobs from **JSearch API (RapidAPI)** and **Google Jobs (SerpApi)** with fallback mechanisms. |
+| 🎨 **Modern Futuristic UI** | Built with React 19, Framer Motion, and Tailwind CSS v4 featuring dark mode aesthetics and glassmorphism. |
+| 🚀 **Vercel Serverless Ready** | Pre-configured with unified frontend build and backend serverless API handlers for instant deployment. |
 
 ---
 
-##  Architecture Workflow
+## 🏗️ System Architecture
 
-The backend is driven by a decentralized agent architecture:
+```mermaid
+graph TD
+    Client[React 19 Frontend UI] -->|POST /api/search or SSE /agent-stream| API[FastAPI Server / Vercel API]
+    
+    subgraph Multi-Agent Orchestrator
+        API --> Orchestrator[Orchestrator]
+        Orchestrator --> Planner[Planner Agent]
+        Orchestrator --> ResumeAgent[Resume Agent]
+        Orchestrator --> SearchAgent[Job Search Agent]
+        Orchestrator --> MatchAgent[Matching Agent]
+        Orchestrator --> ExplainAgent[Explanation Agent]
+    end
 
-1. **`PlannerAgent`**: Decides the exact pipeline of execution based on user payload.
-2. **`JobSearchAgent`**: Interfaces with the SerpAPI for live remote/local job retrieval.
-3. **`ResumeAgent`**: Extracts text from PDFs and categorizes technical parameters.
-4. **`MatchingAgent`**: Cross-references embeddings and executes LLM-driven match scoring.
-5. **`ExplanationAgent`**: Spins up parallel evaluation to generate actionable insights and interview questions.
-
----
-
-##  Quick Start Guide
-
-### 1. Repository Setup
-```bash
-git clone https://github.com/SantoshRM-1/AI-Job-Ajent.git
-cd AI-Job-Ajent
+    ResumeAgent -->|PDF Parsing| PyMuPDF[PyMuPDF + Groq LLaMA 3.3]
+    SearchAgent -->|Live Job Search| JSearch[JSearch RapidAPI / SerpApi Google Jobs]
+    MatchAgent -->|Scoring Engine| Scoring[Hybrid Keyword + LLM Matcher]
+    ExplainAgent -->|AI Insights & Questions| Groq[Groq LLaMA 3.3 70B]
+    
+    Orchestrator -->|Real-Time Status| SSE[Server-Sent Events]
+    SSE --> Client
 ```
 
-### 2. Environment Variables
-Create a `.env` file in the root configuration:
+---
+
+## 🛠️ Technology Stack
+
+### **Backend**
+- **Framework**: Python 3.10+, FastAPI, Uvicorn
+- **AI / LLM Engine**: Groq API (`llama-3.3-70b-versatile`)
+- **PDF Parser**: PyMuPDF (`fitz`)
+- **Database & ORM**: SQLite, SQLAlchemy
+- **Data Validation**: Pydantic v2
+- **External APIs**: RapidAPI (JSearch), SerpApi (Google Jobs)
+
+### **Frontend**
+- **Framework**: React 19 (Vite 8)
+- **Styling**: Tailwind CSS v4, Framer Motion (Animations), Lucide React (Icons)
+- **HTTP Client**: Native Fetch API / Axios
+
+---
+
+## 📂 Project Structure
+
+```
+JobWave_Search/
+├── api/
+│   └── index.py               # Vercel Serverless Function entrypoint
+├── backend/
+│   ├── agents/                # Multi-Agent implementation
+│   │   ├── explanation_agent.py
+│   │   ├── job_search_agent.py
+│   │   ├── matching_agent.py
+│   │   ├── orchestrator.py
+│   │   ├── planner_agent.py
+│   │   └── resume_agent.py
+│   ├── models/                # SQLAlchemy & Pydantic models
+│   ├── routes/                # FastAPI endpoints (job_routes, stream_routes)
+│   ├── services/              # SSE Stream Manager
+│   ├── tools/                 # JSearch API, SerpApi & Resume Analyzer tools
+│   └── main.py                # FastAPI main application
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # React components (JobCard, SearchBar, etc.)
+│   │   └── App.jsx            # Main dashboard application
+│   ├── package.json           # Frontend dependencies
+│   └── vite.config.js         # Vite configuration
+├── package.json               # Root monorepo script configuration
+├── requirements.txt           # Python backend dependencies
+└── vercel.json                # Vercel deployment & route rewriting config
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/SantoshRM-1/JobWave_Search.git
+cd JobWave_Search
+```
+
+### 2. Environment Setup
+Create a `.env` file in the root directory:
 ```env
-SERP_API_KEY=your_serpapi_job_search_key
+# AI Models Key
 GROQ_API_KEY=gsk_your_groq_api_key_here
+
+# Job Search APIs (Choose either or both)
+SERP_API_KEY=your_serpapi_key_here
+RAPIDAPI_KEY=your_rapidapi_key_here
 ```
 
-### 3. Backend Initialization (FastAPI)
+### 3. Start Backend Server
 ```bash
-# Set up a clean virtual environment
-python -m venv backend/venv
-.\backend\venv\Scripts\activate   # (Windows)
-# source backend/venv/bin/activate  (Mac/Linux)
+# Create and activate virtual environment
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# Mac/Linux:
+# source venv/bin/activate
 
-# Install Dependencies
-pip install -r backend/requirements.txt
+# Install dependencies
+pip install -r requirements.txt
 
-# Boot the Server
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+# Start FastAPI server
+uvicorn backend.main:app --reload --port 8000
 ```
 
-### 4. Frontend Initialization (React 19)
-Open a **secondary terminal**:
+### 4. Start Frontend Client
+In a new terminal tab:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
->  **You're all set!** Visit `http://localhost:5173`, upload your resume, and let the agents do the heavy lifting!
+Open your browser at `http://localhost:5173`.
 
 ---
 
+## ☁️ Deployment on Vercel
+
+This repository is optimized for one-click deployment on **Vercel**.
+
+1. Import your GitHub repository (`SantoshRM-1/JobWave_Search`) into **Vercel**.
+2. Set **Root Directory** to `.` (leave default root).
+3. Add your Environment Variables (`GROQ_API_KEY`, `SERP_API_KEY`, etc.) in Vercel Project Settings.
+4. Deploy! Vercel will automatically build the React frontend and deploy the FastAPI backend as serverless functions.
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
