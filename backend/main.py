@@ -13,8 +13,10 @@ from backend.routes.stream_routes import router as stream_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create all DB tables on startup
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print("Lifespan DB notice:", e)
     yield
 
 app = FastAPI(
@@ -34,12 +36,11 @@ app.add_middleware(
 
 app.include_router(job_router)
 app.include_router(stream_router)
-# Vercel routes requests through /api while local development can use the
-# short routes above. Keeping both makes the frontend deploy without changes.
 app.include_router(job_router, prefix="/api")
 app.include_router(stream_router, prefix="/api")
 
+@app.get("/")
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
-    return {"message": "AI Job Agent Running 🚀"}
-
+    return {"status": "ok", "message": "AI Job Agent Running 🚀"}
