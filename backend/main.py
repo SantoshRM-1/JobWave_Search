@@ -28,8 +28,11 @@ app = FastAPI(
 
 import os
 
+frontend_url = os.getenv("FRONTEND_URL", "").strip()
 cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
 allowed_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+if frontend_url and frontend_url not in allowed_origins:
+    allowed_origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
