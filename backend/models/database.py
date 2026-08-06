@@ -3,7 +3,18 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import StaticPool
 import os
 
-if os.getenv("VERCEL"):
+db_env = os.getenv("DATABASE_URL")
+
+if db_env:
+    DATABASE_URL = db_env
+    if DATABASE_URL.startswith("sqlite"):
+        engine = create_engine(
+            DATABASE_URL,
+            connect_args={"check_same_thread": False}
+        )
+    else:
+        engine = create_engine(DATABASE_URL)
+elif os.getenv("VERCEL"):
     DATABASE_URL = "sqlite:///:memory:"
     engine = create_engine(
         DATABASE_URL,

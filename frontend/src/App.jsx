@@ -4,7 +4,7 @@ import { AnimatePresence, motion as Motion } from 'framer-motion';
 import JobCard from './components/JobCard';
 import SearchBar from './components/SearchBar';
 
-const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:8000' : '/api');
+const API_BASE = (import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '')).replace(/\/$/, '');
 const PAGE_SIZE = 6;
 const thinkingSteps = ['Reading your search', 'Finding current roles', 'Matching your experience', 'Preparing job links'];
 
